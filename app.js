@@ -56,16 +56,25 @@ const generateKeyBucketPairs = async bucket => {
     Bucket: bucket,
     MaxKeys: 2
   };
-  const content = [];
-  let promise = new Promise((resolve, reject) => {
+  let content = [];
+  const promise = new Promise((resolve, reject) => {
     s3.listObjectsV2(params).eachPage((err, data, done) => {
       if (err) {
         reject(err);
       }
+      if (data) {
+        content = [
+          ...content,
+          ...data.Contents.map(({ Key }) => ({
+            key: Key,
+            bucket,
+            externalId: Key
+          }))
+        ];
+      }
       if (data === null) {
         resolve(content);
       }
-      content.push(data);
       done();
     });
   });
@@ -87,6 +96,9 @@ const writeToDest = (err, data) => {
   }
 };
 
-generateKeyBucketPairs("labelbox-example-proxy").then(data =>
-  console.log(data).then(() => console.log("done"))
-);
+generateKeyBucketPairs("labelbox-example-proxy")
+  .then(data => {
+    console.log(data);
+    return data;
+  })
+  .then(() => console.log("done"));
