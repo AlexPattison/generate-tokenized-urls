@@ -1,5 +1,3 @@
-"use strict";
-
 console.log("Running Conversion");
 
 const args = require("yargs").argv;
@@ -8,9 +6,9 @@ const jwt = require("jsonwebtoken");
 const secret = args["secret"];
 const host = args["host"];
 
-const mapToUrl = ({ key, bucket, externalId = "" }) => {
-  if (!key || !bucket) {
-    throw new Error('"key" and "bucket" are both required properties');
+const mapToUrl = ({ key = key, bucket, externalId = "" }) => {
+  if (!bucket) {
+    throw new Error('"bucket" is a required property');
   }
 
   if (!secret) {
@@ -30,15 +28,21 @@ const mapToUrl = ({ key, bucket, externalId = "" }) => {
   return { externalId, imageUrl: `${host}?token=${encoded}` };
 };
 
-const parseData = (err, data, callback) => {
-  if (err) throw err;
-  const json = JSON.parse(data);
+const parseDataAndWriteToDest = (err, data, callback) => {
+  if (err) {
+    throw err;
+  }
 
+  const json = JSON.parse(data);
   const mappedJson = json.map(mapToUrl);
 
-  fs.writeFile("cleaned-data.json", JSON.stringify(mappedJson), () =>
-    console.log("The data has been saved")
-  );
+  fs.writeFile("cleaned-data.json", JSON.stringify(mappedJson), err => {
+    if (err) {
+      throw err;
+    }
+
+    console.log("The data has been saved");
+  });
 };
 
-fs.readFile("example.json", parseData);
+fs.readFile("example.json", parseDataAndWriteToDest);
