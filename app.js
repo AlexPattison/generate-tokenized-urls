@@ -61,7 +61,7 @@ const generateKeyBucketPairs = async bucket => {
   return await gatherUrlsFromBucket;
 };
 
-const writeToDest = async () => {
+const writeToOutput = async () => {
   const json = await generateKeyBucketPairs(args.bucket);
 
   fs.writeFile(args.output, JSON.stringify(json), err => {
@@ -73,4 +73,4 @@ const writeToDest = async () => {
   });
 };
 
-writeToDest();
+writeToOutput();
