@@ -1,0 +1,14 @@
+[
+  {
+    "bucket": "labelbox-example-proxy",
+    "key": "01.jpg"
+  },
+  {
+    "bucket": "labelbox-example-proxy",
+    "key": "02.jpg"
+  },
+  {
+    "bucket": "labelbox-example-proxy",
+    "key": "03.jpg"
+  }
+]
