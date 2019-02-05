@@ -1,10 +1,16 @@
 console.log("Running Conversion");
 
+const AWS = require("aws-sdk");
 const args = require("yargs").argv;
 const fs = require("fs");
 const jwt = require("jsonwebtoken");
 const secret = args["secret"];
 const host = args["host"];
+const input = args["input"];
+const output = args["output"];
+const bucket = args["bucket"];
+
+const s3 = new AWS.S3();
 
 const mapToUrl = ({ key = key, bucket, externalId = "" }) => {
   if (!bucket) {
@@ -45,4 +51,42 @@ const parseDataAndWriteToDest = (err, data, callback) => {
   });
 };
 
-fs.readFile("example.json", parseDataAndWriteToDest);
+const generateKeyBucketPairs = async bucket => {
+  const params = {
+    Bucket: bucket,
+    MaxKeys: 2
+  };
+  const content = [];
+  let promise = new Promise((resolve, reject) => {
+    s3.listObjectsV2(params).eachPage((err, data, done) => {
+      if (err) {
+        reject(err);
+      }
+      if (data === null) {
+        resolve(content);
+      }
+      content.push(data);
+      done();
+    });
+  });
+
+  return await promise;
+};
+
+const writeToDest = (err, data) => {
+  if (err) {
+    throw err;
+  }
+
+  if (input) {
+    fs.readFile("example.json", parseDataAndWriteToDest);
+  } else {
+    console.log(
+      "This means no input file was given and we need to generate keys"
+    );
+  }
+};
+
+generateKeyBucketPairs("labelbox-example-proxy").then(data =>
+  console.log(data).then(() => console.log("done"))
+);
