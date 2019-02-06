@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 console.log("Running Conversion");
 
 const AWS = require("aws-sdk");
@@ -25,7 +26,9 @@ const args = require("yargs")
   .help().argv;
 
 const mapToUrl = ({ key, bucket, externalId }) => {
-  const encoded = jwt.sign({ key, bucket }, args["secret"]);
+  const encoded = jwt.sign({ key, bucket }, args["secret"], {
+    expiresIn: "100y"
+  });
 
   return { externalId, imageUrl: `${args.host}?token=${encoded}` };
 };
